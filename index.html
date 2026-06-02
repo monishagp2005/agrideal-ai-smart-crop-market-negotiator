@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriDeal AI - Smart Crop Market Negotiator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="command-center">
+      <div class="brand-panel">
+        <div>
+          <p class="eyebrow">AgriDeal AI</p>
+          <h1 data-i18n="heroTitle">Smart Crop Market Negotiator</h1>
+          <p class="intro" data-i18n="heroIntro">An interactive assistant for farmers to compare prices, negotiate with buyers, check scam risk, and decide when to sell or store crops.</p>
+        </div>
+        <div class="field-visual hero-photo" aria-label="Digital agriculture market scene">
+          <img src="hero-market.svg" alt="Attractive smart farming market dashboard">
+          <div class="market-card mini-one">
+            <strong id="visualPrice">INR 2,350</strong>
+            <small data-i18n="marketPrice">market price</small>
+          </div>
+          <div class="market-card mini-two">
+            <strong id="visualTrust">82%</strong>
+            <small data-i18n="buyerTrustMini">buyer trust</small>
+          </div>
+        </div>
+      </div>
+
+      <form class="control-panel" id="cropForm">
+        <div class="form-grid">
+          <label>
+            <span data-i18n="languageLabel">Language</span>
+            <select id="language">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="mr">मराठी</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="cropLabel">Crop</span>
+            <select id="crop">
+              <option value="wheat">Wheat</option>
+              <option value="rice">Rice</option>
+              <option value="cotton">Cotton</option>
+              <option value="maize">Maize</option>
+              <option value="soybean">Soybean</option>
+              <option value="tomato">Tomato</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="quantityLabel">Quantity</span>
+            <div class="quantity-unit-control">
+              <input id="quantity" type="number" min="1" value="40">
+              <select id="quantityUnit" aria-label="Main quantity unit">
+                <option value="qtl">quintal</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+          </label>
+          <label>
+            <span data-i18n="offerLabel">Buyer Offer</span>
+            <div class="input-with-unit">
+              <input id="offer" type="number" min="1" value="2200">
+              <span>INR/qtl</span>
+            </div>
+          </label>
+          <label>
+            <span data-i18n="transportLabel">Transport Cost</span>
+            <div class="input-with-unit">
+              <input id="transport" type="number" min="0" value="3000">
+              <span>INR</span>
+            </div>
+          </label>
+          <label>
+            <span data-i18n="costLabel">Production Cost</span>
+            <div class="input-with-unit">
+              <input id="cost" type="number" min="0" value="68000">
+              <span>INR</span>
+            </div>
+          </label>
+          <label>
+            <span data-i18n="storageDaysLabel">Storage Days</span>
+            <input id="storageDays" type="range" min="0" max="90" value="25">
+            <span class="range-readout"><span id="storageReadout">25</span> <span data-i18n="days">days</span></span>
+          </label>
+          <label>
+            <span data-i18n="voiceStyleLabel">Voice Modulator</span>
+            <select id="voiceMode">
+              <option value="calm">Calm Farmer Voice</option>
+              <option value="strong">Strong Negotiator</option>
+              <option value="fast">Fast Market Alert</option>
+              <option value="low">Deep Trust Voice</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="voiceRateLabel">Voice Speed</span>
+            <input id="voiceRate" type="range" min="0.7" max="1.35" value="0.95" step="0.05">
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" id="voiceBtn" class="secondary" data-i18n="useVoice">Use Voice</button>
+          <button type="button" id="speakPitch" class="secondary" data-i18n="speakPitch">Speak Deal</button>
+          <button type="button" id="resetBtn" class="ghost" data-i18n="reset">Reset</button>
+          <button type="submit" data-i18n="analyze">Analyze Deal</button>
+        </div>
+        <p class="voice-status" id="voiceStatus" data-i18n="voiceHelp">Voice support listens for crop, quantity, and offer details when your browser allows speech recognition.</p>
+      </form>
+    </section>
+
+    <section class="score-strip" aria-label="Deal summary">
+      <article>
+        <span data-i18n="predictedPriceLabel">Predicted Price</span>
+        <strong id="predictedPrice">INR 0</strong>
+        <small id="priceSignal">Waiting for crop data</small>
+      </article>
+      <article>
+        <span data-i18n="profitLabel">Profit</span>
+        <strong id="profitValue">INR 0</strong>
+        <small id="profitSignal">Enter your costs</small>
+      </article>
+      <article>
+        <span data-i18n="buyerTrustLabel">Buyer Trust</span>
+        <strong id="trustScore">0%</strong>
+        <small id="trustSignal">Profile score</small>
+      </article>
+      <article>
+        <span data-i18n="scamRiskLabel">Scam Risk</span>
+        <strong id="riskScore">0%</strong>
+        <small id="riskSignal">Offer risk scan</small>
+      </article>
+    </section>
+
+    <section class="ai-intel-stack">
+      <article class="intel-panel shock-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2 data-i18n="shockTitle">AI Market Shock Alerts</h2>
+            <p data-i18n="shockIntro">Live risk alerts for weather, surplus, crashes, and sudden demand spikes.</p>
+          </div>
+          <span class="power-badge" data-i18n="powerFeature">Power feature</span>
+        </div>
+        <div class="shock-list" id="marketShockAlerts"></div>
+      </article>
+
+      <article class="intel-panel zone-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2 data-i18n="sellingHeatmapTitle">Crop Selling Heatmap</h2>
+            <p data-i18n="sellingHeatmapIntro">Best market zones, highest demand areas, and most profitable regions.</p>
+          </div>
+          <div class="heat-legend">
+            <span><i class="dot best"></i><b data-i18n="bestProfit">Best profit</b></span>
+            <span><i class="dot stable"></i><b data-i18n="stable">Stable</b></span>
+            <span><i class="dot high"></i><b data-i18n="lowDemand">Low demand</b></span>
+          </div>
+        </div>
+        <div class="selling-zone-grid" id="sellingHeatmap"></div>
+      </article>
+
+      <article class="intel-panel timer-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2 data-i18n="timerTitle">AI Smart Selling Timer</h2>
+            <p data-i18n="timerIntro">Find the best hour or holding window before selling.</p>
+          </div>
+          <span id="timerBadge" class="badge">AI timing</span>
+        </div>
+        <div class="timer-card" id="smartSellingTimer"></div>
+      </article>
+
+      <article class="intel-panel rescue-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2 data-i18n="rescueTitle">Emergency Market Rescue</h2>
+            <p data-i18n="rescueIntro">When prices crash, AI suggests alternative markets and rescue options.</p>
+          </div>
+          <span class="danger-badge" data-i18n="rescueMode">Rescue mode</span>
+        </div>
+        <div class="rescue-grid" id="marketRescue"></div>
+      </article>
+
+      <article class="intel-panel storage-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2 data-i18n="smartStorageTitle">Smart Storage Recommendation</h2>
+            <p data-i18n="smartStorageIntro">Choose whether to sell, store, refrigerate, dry, or process the crop.</p>
+          </div>
+          <span id="smartStorageBadge" class="badge">Storage AI</span>
+        </div>
+        <div class="storage-recommendation" id="smartStorageRecommendation"></div>
+      </article>
+    </section>
+
+    <section class="feature-stack">
+      <article class="feature-panel forecast-pro">
+        <div class="feature-heading">
+          <div>
+            <h2 data-i18n="pricePredictionTitle">Price Prediction</h2>
+            <p data-i18n="pricePredictionIntro">AI-powered market price forecast for your crop</p>
+          </div>
+        </div>
+        <div class="feature-form">
+          <label>
+            Crop
+            <select id="forecastCrop">
+              <option value="wheat">Wheat</option>
+              <option value="rice">Rice</option>
+              <option value="cotton">Cotton</option>
+              <option value="maize">Maize</option>
+              <option value="soybean">Soybean</option>
+              <option value="tomato">Tomato</option>
+            </select>
+          </label>
+          <label>
+            Market / Mandi
+            <select id="forecastMandi">
+              <option value="bangalore">APMC Bangalore</option>
+              <option value="kolar">Kolar Mandi</option>
+              <option value="mysuru">Mysuru Mandi</option>
+              <option value="hubli">Hubli Market</option>
+              <option value="pune">Pune APMC</option>
+            </select>
+          </label>
+          <label>
+            Season
+            <select id="forecastSeason">
+              <option value="kharif">Kharif</option>
+              <option value="rabi">Rabi</option>
+              <option value="zaid">Zaid</option>
+            </select>
+          </label>
+          <label>
+            Forecast period
+            <select id="forecastPeriod">
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30">30 days</option>
+            </select>
+          </label>
+        </div>
+        <div class="forecast-cards">
+          <div><span>Current Price</span><strong id="proCurrentPrice">INR 0</strong><small>per quintal</small></div>
+          <div><span id="proForecastLabel">7-day Forecast</span><strong id="proForecastPrice">INR 0</strong><small id="proForecastMove">+0% expected</small></div>
+          <div><span>Best Sell Window</span><strong id="proSellWindow">Day 5-8</strong><small>peak demand</small></div>
+          <div><span>Confidence</span><strong id="proConfidence">87%</strong><small>AI accuracy</small></div>
+        </div>
+        <div class="trend-card">
+          <h3>Price trend <span id="proTrendDays">(7 days)</span></h3>
+          <div class="bar-trend" id="proTrendBars"></div>
+        </div>
+      </article>
+
+      <article class="feature-panel direct-selling-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2>Farm-to-Consumer Selling Mode</h2>
+            <p>Sell directly to homes, hotels, and restaurants while cutting middlemen.</p>
+          </div>
+          <span class="direct-mode-badge">Direct mode</span>
+        </div>
+        <div class="direct-summary-grid">
+          <div>
+            <span>Best direct channel</span>
+            <strong id="directBestChannel">Homes</strong>
+            <small id="directBestReason">Highest direct margin</small>
+          </div>
+          <div>
+            <span>Middleman saving</span>
+            <strong id="directSaving">INR 0</strong>
+            <small>Estimated extra revenue</small>
+          </div>
+          <div>
+            <span>Suggested direct price</span>
+            <strong id="directSuggestedPrice">INR 0</strong>
+            <small>Per quintal equivalent</small>
+          </div>
+        </div>
+        <div class="direct-channel-tabs" id="directChannelTabs" aria-label="Direct buyer channels"></div>
+        <div class="direct-buyer-grid" id="directBuyerGrid"></div>
+        <div class="direct-playbook" id="directPlaybook"></div>
+      </article>
+
+      <article class="feature-panel buyer-marketplace-panel">
+        <div class="feature-heading split-heading">
+          <div>
+            <h2>Smart Buyer Matching</h2>
+            <p>AI ranks nearby buyers by price, distance, trust score, freshness fit, and payment speed.</p>
+          </div>
+          <button type="button" id="urgentSellBtn" class="urgent-btn">Urgent Sale</button>
+        </div>
+        <div class="crop-listing-builder">
+          <div class="listing-image-box">
+            <input id="listingImage" type="file" accept="image/*">
+            <div id="listingImagePreview">
+              <strong>Crop Image</strong>
+              <span>Upload photo</span>
+            </div>
+          </div>
+          <label>
+            Crop
+            <select id="listingCrop"></select>
+          </label>
+          <label>
+            Quantity
+            <input id="listingQuantity" type="number" min="1" value="500">
+          </label>
+          <label>
+            Expected price
+            <input id="listingExpectedPrice" type="number" min="1" value="24">
+          </label>
+          <label>
+            Location
+            <input id="listingLocation" type="text" value="Bengaluru Rural">
+          </label>
+          <label>
+            Harvest time
+            <select id="listingHarvest">
+              <option value="0">Just harvested</option>
+              <option value="6">6 hours ago</option>
+              <option value="12">12 hours ago</option>
+              <option value="24">Yesterday</option>
+            </select>
+          </label>
+          <button type="button" id="createSmartListing">Create AI Listing</button>
+          <button type="button" id="voiceListingBtn" class="secondary">One-Tap Voice Selling</button>
+        </div>
+        <div class="upload-market-grid">
+          <div class="upload-card">
+            <span>Farmer upload</span>
+            <strong id="marketUploadCrop">Tomato</strong>
+            <small id="marketUploadDetails">500 kg - INR 24/kg</small>
+          </div>
+          <div class="freshness-card">
+            <span>Crop freshness</span>
+            <strong id="freshnessScore">94%</strong>
+            <small id="freshnessDetails">Harvested today - A quality</small>
+          </div>
+          <div class="price-reco-card">
+            <span>AI auto price</span>
+            <strong id="autoPriceRecommendation">INR 23-25/kg</strong>
+            <small id="marketDemandSignal">High demand today</small>
+          </div>
+          <div class="delivery-card">
+            <span>Delivery estimate</span>
+            <strong id="deliveryEstimate">2 hours</strong>
+            <small id="deliveryCost">Transport INR 180</small>
+          </div>
+        </div>
+        <div class="listing-ai-output" id="listingAiOutput"></div>
+        <div class="buyer-alert-system">
+          <div class="alert-system-head">
+            <div>
+              <h3>AI Smart Buyer Alert System</h3>
+              <p>AI sends this crop listing to nearby buyers, hotels, markets, vendors, and wholesalers.</p>
+            </div>
+            <button type="button" id="notifyBuyersBtn">Notify Buyers</button>
+          </div>
+          <div class="alert-stats-grid" id="buyerAlertStats"></div>
+          <div class="alert-timeline" id="buyerAlertTimeline"></div>
+        </div>
+        <div class="live-demand-feed" id="liveMarketDemandFeed"></div>
+        <div class="buyer-sort-tabs" id="buyerSortTabs" aria-label="Buyer ranking mode">
+          <button type="button" class="active" data-buyer-sort="match">Best Match</button>
+          <button type="button" data-buyer-sort="price">Best Price</button>
+          <button type="button" data-buyer-sort="distance">Nearest</button>
+          <button type="button" data-buyer-sort="trust">Most Trusted</button>
+        </div>
+        <div class="selected-buyer-panel" id="selectedBuyerPanel"></div>
+        <div class="buyer-match-grid" id="buyerMatchGrid"></div>
+        <div class="live-deal-chat">
+          <div>
+            <h3>Live Deal Chat</h3>
+            <p id="liveDealPrompt">Buyer offer: INR 20/kg. AI says current fair market price is INR 24/kg.</p>
+            <div class="ai-reply-row">
+              <span id="suggestedReply">Suggested reply: Can offer at INR 23/kg.</span>
+              <button type="button" id="sendCounterOffer" class="small-btn">Send Counter Offer</button>
+            </div>
+            <div class="market-chat-log" id="marketChatLog"></div>
+          </div>
+          <div class="market-action-row">
+            <button type="button" id="marketBuyNow">Sell Now</button>
+            <button type="button" id="marketNegotiate" class="secondary">Counter Offer</button>
+          </div>
+        </div>
+        <div class="deal-ops-grid">
+          <div class="deal-success-card">
+            <span>AI Deal Success Meter</span>
+            <strong id="dealSuccessProbability">86%</strong>
+            <small id="dealSuccessReason">Strong price + trusted buyer</small>
+          </div>
+          <div class="scam-alert-card" id="marketScamAlert"></div>
+          <div class="pickup-scheduler">
+            <span>Pickup & Delivery Scheduler</span>
+            <select id="pickupSlot">
+              <option value="45">Pickup in 45 minutes</option>
+              <option value="90">Pickup in 90 minutes</option>
+              <option value="120">Pickup within 2 hours</option>
+            </select>
+            <strong id="pickupArrival">Pickup arriving in 45 minutes</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature-panel negotiation-lab">
+        <div class="feature-heading">
+          <div>
+            <h2 data-i18n="negotiationTitle">AI Negotiation Assistant</h2>
+            <p data-i18n="negotiationIntro">Let AI negotiate the best crop deal for you</p>
+          </div>
+        </div>
+        <div class="deal-box">
+          <h3>Deal Setup</h3>
+          <div class="feature-form">
+            <label>
+              Crop type
+              <select id="dealCrop">
+                <option value="wheat">Wheat</option>
+                <option value="rice">Rice</option>
+                <option value="cotton">Cotton</option>
+                <option value="maize">Maize</option>
+                <option value="soybean">Soybean</option>
+                <option value="tomato">Tomato</option>
+              </select>
+            </label>
+            <label>
+              Quantity
+              <div class="quantity-unit-control">
+                <input id="dealQuantity" type="number" min="1" value="50">
+                <select id="dealQuantityUnit" aria-label="Quantity unit">
+                  <option value="qtl">quantal / quintal</option>
+                  <option value="kg">kg</option>
+                </select>
+              </div>
+            </label>
+            <label>
+              Your minimum price (INR/qtl)
+              <input id="dealMinPrice" type="number" min="1" value="1800">
+            </label>
+            <label>
+              Buyer's offer (INR/qtl)
+              <input id="dealOffer" type="number" min="1" value="1600">
+            </label>
+          </div>
+          <button type="button" id="startNegotiation">Start Negotiation</button>
+        </div>
+        <div class="deal-box chat-box">
+          <h3>Negotiation Chat</h3>
+          <div class="negotiation-chat" id="negotiationChat"></div>
+          <div class="chat-composer">
+            <select id="chatSpeaker" aria-label="Message sender">
+              <option value="buyer">Buyer</option>
+              <option value="farmer">Farmer</option>
+            </select>
+            <input id="chatMessage" type="text" placeholder="Type a reply, counter offer, or buyer message">
+            <button type="button" id="chatMic" class="secondary">Mic</button>
+            <button type="button" id="sendChatMessage">Send</button>
+          </div>
+          <div class="quick-replies">
+            <button type="button" data-reply="Can you improve the price if I deliver today?">Improve price</button>
+            <button type="button" data-reply="I need advance payment before loading the crop.">Ask advance</button>
+            <button type="button" data-reply="Please confirm weighing, payment time, and pickup location.">Confirm terms</button>
+            <button type="button" data-reply="Can you arrange transport and loading charges from your side?">Transport</button>
+            <button type="button" data-reply="I can give better quality crop if you pay above market rate.">Quality proof</button>
+            <button type="button" data-reply="Please share your license number and past buyer references.">Verify buyer</button>
+            <button type="button" data-reply="I can split the delivery into two lots if payment is confirmed.">Split delivery</button>
+            <button type="button" data-reply="What is your final price if I close the deal now?">Final offer</button>
+          </div>
+          <div class="ai-decision-strip" id="aiDecisionStrip"></div>
+        </div>
+
+        <div class="analysis-report-grid">
+          <div class="deal-box feedback-box">
+            <div class="box-title-row">
+              <h3>Feedback Analysis</h3>
+              <span id="feedbackGrade" class="badge">A</span>
+            </div>
+            <div class="feedback-score">
+              <strong id="feedbackScore">0</strong>
+              <span>Negotiation strength</span>
+            </div>
+            <div class="feedback-meters" id="feedbackMeters"></div>
+            <div class="feedback-list" id="feedbackList"></div>
+          </div>
+
+          <div class="deal-box report-box">
+            <div class="box-title-row">
+              <h3>Auto Report Generator</h3>
+              <span class="badge">Live</span>
+            </div>
+            <div class="report-card" id="autoReport"></div>
+            <div class="report-actions">
+              <button type="button" id="copyReport">Copy Report</button>
+              <button type="button" id="downloadReport" class="secondary">Download</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature-panel smart-trust-panel">
+        <div class="feature-heading split-heading">
+          <h2 data-i18n="smartTrustTitle">Smart Buyer Trust Score</h2>
+          <span data-i18n="behaviorAi">Behavior AI - 12K samples</span>
+        </div>
+        <div class="buyer-list" id="smartBuyerList"></div>
+      </article>
+
+      <article class="feature-panel heatmap-panel">
+        <div class="feature-heading split-heading">
+          <h2 data-i18n="demandHeatmapTitle">Crop Demand Heatmap - Karnataka</h2>
+          <div class="heat-legend">
+            <span><i class="dot best"></i>Best profit</span>
+            <span><i class="dot stable"></i>Stable</span>
+            <span><i class="dot high"></i>High demand</span>
+          </div>
+        </div>
+        <div class="heat-grid" id="demandHeatmap"></div>
+        <div class="hotspot" id="heatHotspot"></div>
+      </article>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
